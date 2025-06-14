@@ -19,35 +19,40 @@ export function LoginForm({
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    setError("")
-    setLoading(true)
+const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault()
+  setError("")
+  setLoading(true)
 
-    try {
-      const response = await fetch("/api/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      })
+  try {
+    const response = await fetch("http://localhost:5000/api/auth/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include", // ✅ ADD THIS LINE
+      body: JSON.stringify({ email, password }),
+    })
 
-      const data = await response.json()
 
-      if (!response.ok) {
-        throw new Error(data.message || "Login failed")
-      }
+    const data = await response.json()
 
-      // Redirect or handle success
-      console.log("Login successful:", data)
-      // Example: router.push("/dashboard")
-    } catch (err: any) {
-      setError(err.message)
-    } finally {
-      setLoading(false)
+    if (!response.ok) {
+      throw new Error(data.message || "Login failed")
     }
+
+    // ✅ Store token
+    localStorage.setItem("token", data.token)
+
+    // ✅ Redirect to dashboard
+    router.push("/dashboard")
+  } catch (err: any) {
+    setError(err.message)
+  } finally {
+    setLoading(false)
   }
+}
+
   const router = useRouter()
   return (
     
