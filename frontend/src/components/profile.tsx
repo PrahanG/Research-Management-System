@@ -35,7 +35,12 @@ export function Profile() {
         if (!response.ok) throw new Error("Failed to fetch user data")
 
         const data = await response.json()
-        setUser(data)
+        setUser({
+          username: data.username ?? "",
+          role: data.role ?? "",
+          bio: data.bio ?? "",
+          avatar: data.avatar ?? "/download.jpg",
+        })
       } catch (err) {
         console.error(err)
       }
@@ -46,8 +51,8 @@ export function Profile() {
 
   const handleEdit = () => {
     setEditing(true)
-    setBioDraft(user.bio)
-    setImageDraft(user.avatar)
+    setBioDraft(user.bio ?? "")
+    setImageDraft(user.avatar ?? "")
   }
 
   const handleSave = async () => {
@@ -67,7 +72,12 @@ export function Profile() {
       if (!response.ok) throw new Error("Failed to update user data")
 
       const data = await response.json()
-      setUser(data)
+      setUser({
+        username: data.username ?? "",
+        role: data.role ?? "",
+        bio: data.bio ?? "",
+        avatar: data.avatar ?? "/download.jpg",
+      })
       setEditing(false)
     } catch (err) {
       console.error(err)
@@ -81,7 +91,7 @@ export function Profile() {
           <div className="flex items-center gap-6">
             <div className="rounded-full bg-[#181818] w-[100px] h-[100px] overflow-hidden relative">
               <img
-                src={editing ? imageDraft : user.avatar}
+                src={editing ? imageDraft ?? "/download.jpg" : user.avatar ?? "/download.jpg"}
                 alt="Profile"
                 className="w-full h-full object-cover"
               />
@@ -96,11 +106,11 @@ export function Profile() {
             <CardTitle className="text-2xl font-semibold">Bio</CardTitle>
             {editing ? (
               <Input
-                value={bioDraft}
+                value={bioDraft ?? ""}
                 onChange={(e) => setBioDraft(e.target.value)}
               />
             ) : (
-              <CardDescription>{user.bio}</CardDescription>
+              <CardDescription>{user.bio ?? ""}</CardDescription>
             )}
           </div>
 
@@ -108,7 +118,7 @@ export function Profile() {
             <div className="mt-4">
               <Input
                 placeholder="Image URL"
-                value={imageDraft}
+                value={imageDraft ?? ""}
                 onChange={(e) => setImageDraft(e.target.value)}
               />
             </div>
