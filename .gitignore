@@ -1,0 +1,48 @@
+# Python virtual environment
+venv/
+.venv/
+env/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Distribution / packaging
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Environment variables - NEVER commit secrets
+backend/.env
+.env
+
+# SQLite databases (dev only, production uses PostgreSQL)
+*.db
+*.sqlite
+*.sqlite3
+backend/instance/
+
+# Flask session/cache files
+backend/app/__pycache__/
+backend/app/routes/__pycache__/
+backend/app/tasks/__pycache__/
+flask_session/
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# OS generated files
+.DS_Store
+.DS_Store?
+Thumbs.db
+ehthumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
