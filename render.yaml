@@ -19,7 +19,7 @@ services:
       - key: JWT_SECRET
         generateValue: true
       - key: FRONTEND_URL
-        value: https://project-management-system-seven-mu.vercel.app
+        value: https://project-management-system-mu-self.vercel.app
 
 databases:
   - name: rams-pg

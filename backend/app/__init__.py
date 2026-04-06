@@ -31,7 +31,7 @@ def create_app(test_config=None):
     allowed_origins = [
         "http://localhost:3000",
         "http://127.0.0.1:3000",
-        os.environ.get("FRONTEND_URL", "https://project-management-system-seven-mu.vercel.app"),
+        os.environ.get("FRONTEND_URL", "https://project-management-system-mu-self.vercel.app"),
     ]
     CORS(app, origins=allowed_origins, supports_credentials=True)
     db.init_app(app)
