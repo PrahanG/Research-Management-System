@@ -58,13 +58,56 @@ def create_publication(current_user):
 @bp.route('/sync', methods=['POST'])
 @token_required
 def trigger_sync(current_user):
-    from app.tasks.publication_sync import sync_publications_for_user
-    
-    # Fire off background task asynchronously (returns immediately)
-    task = sync_publications_for_user.delay(current_user.id)
-    
-    return jsonify({
-        'message': 'Publication synchronization triggered successfully',
-        'task_id': task.id
-    }), 202
+    import requests as http_requests
+    from datetime import datetime as dt
+
+    author_name = current_user.name
+    url = f"https://api.crossref.org/works?query.author={author_name}&rows=15&mailto=admin@rams.edu"
+
+    try:
+        response = http_requests.get(url, timeout=10)
+        response.raise_for_status()
+        items = response.json().get('message', {}).get('items', [])
+        added_count = 0
+
+        for item in items:
+            title = item.get('title', ['Unnamed'])[0]
+            doi = item.get('DOI') or None
+
+            if doi and Publication.query.filter_by(doi=doi).first():
+                continue
+
+            authors = [f"{a.get('given','')} {a.get('family','')}".strip() for a in item.get('author', [])]
+            authors_str = ", ".join(authors) if authors else "Unknown Authors"
+            citations = item.get('is-referenced-by-count', 0)
+
+            published_date = None
+            try:
+                date_parts = item.get('published-print', {}).get('date-parts', [[None]])[0]
+                if date_parts[0]:
+                    published_date = dt(date_parts[0], date_parts[1] if len(date_parts) > 1 else 1, date_parts[2] if len(date_parts) > 2 else 1).date()
+            except Exception:
+                pass
+
+            new_pub = Publication(
+                title=title, authors_str=authors_str, doi=doi,
+                citations=citations, published_date=published_date,
+                user_id=current_user.id
+            )
+            db.session.add(new_pub)
+            added_count += 1
+
+        if added_count > 0:
+            activity = ActivityEvent(
+                event_type="System Sync",
+                description=f"Synced {added_count} publications for {current_user.name} from Crossref.",
+                user_id=current_user.id
+            )
+            db.session.add(activity)
+
+        db.session.commit()
+        return jsonify({'message': f'Synced {added_count} new publications successfully'}), 200
+
+    except Exception as e:
+        return jsonify({'message': f'Sync failed: {str(e)}'}), 500
 
