@@ -50,15 +50,15 @@ services:
           name: rams-backend
           envVarKey: SECRET_KEY
 
+  - type: redis
+    name: rams-redis
+    region: ohio
+    plan: free
+    ipAllowList: []
+
 databases:
   - name: rams-pg
     plan: free
     databaseName: rams
     user: rams_admin
     region: ohio
-
-  - type: redis
-    name: rams-redis
-    region: ohio
-    plan: free
-    ipAllowList: []

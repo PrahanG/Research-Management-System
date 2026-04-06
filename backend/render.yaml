@@ -4,6 +4,7 @@ services:
     env: python
     region: ohio
     plan: free
+    rootDir: backend
     buildCommand: "pip install -r requirements.txt && flask db upgrade"
     startCommand: "gunicorn -w 4 -k gthread run:app"
     envVars:
@@ -22,12 +23,15 @@ services:
           type: redis
           name: rams-redis
           property: connectionString
+      - key: FRONTEND_URL
+        value: https://project-management-system-seven-mu.vercel.app
 
   - type: worker
     name: rams-celery
     env: python
     region: ohio
     plan: free
+    rootDir: backend
     buildCommand: "pip install -r requirements.txt"
     startCommand: "celery -A celery_worker.celery worker --loglevel=info"
     envVars:
@@ -40,6 +44,17 @@ services:
           type: redis
           name: rams-redis
           property: connectionString
+      - key: SECRET_KEY
+        fromService:
+          type: web
+          name: rams-backend
+          envVarKey: SECRET_KEY
+
+  - type: redis
+    name: rams-redis
+    region: ohio
+    plan: free
+    ipAllowList: []
 
 databases:
   - name: rams-pg
@@ -47,9 +62,3 @@ databases:
     databaseName: rams
     user: rams_admin
     region: ohio
-
-  - type: redis
-    name: rams-redis
-    region: ohio
-    plan: free
-    ipAllowList: [] 
